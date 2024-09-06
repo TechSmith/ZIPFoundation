@@ -21,6 +21,7 @@ public let defaultDirectoryPermissions = UInt16(0o755)
 let defaultPOSIXBufferSize = defaultReadChunkSize
 let defaultDirectoryUnitCount = Int64(1)
 let minEndOfCentralDirectoryOffset = Int64(22)
+let maxDirectoryEndOffset = Int64(66000)
 let endOfCentralDirectoryStructSignature = 0x06054b50
 let localFileHeaderStructSignature = 0x04034b50
 let dataDescriptorStructSignature = 0x08074b50
@@ -278,7 +279,7 @@ public final class Archive: Sequence {
         var index = minEndOfCentralDirectoryOffset
         fseeko(file, 0, SEEK_END)
         let archiveLength = Int64(ftello(file))
-        while eocdOffset == 0 && index <= archiveLength {
+        while eocdOffset == 0 && index < maxDirectoryEndOffset && index <= archiveLength {
             fseeko(file, off_t(archiveLength - index), SEEK_SET)
             var potentialDirectoryEndTag: UInt32 = UInt32()
             fread(&potentialDirectoryEndTag, 1, MemoryLayout<UInt32>.size, file)
